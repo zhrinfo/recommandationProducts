@@ -1,0 +1,48 @@
+Rapport de résultats
+Fichier source: C:\Users\U\Downloads\data-fusionnee\data_fusionnee.csv
+Total produits analysés: 30069
+Répartition par genre cible:
+  Homme: 1801
+  Femme: 1817
+  Unisexe: 26451
+
+Taille train/test (articles): 24055/6014
+Classifieur textuel entraîné. Accuracy (test): 0.4879
+
+Règle de classification (label de référence): Homme si achats masculins >= 70%, Femme si achats féminins >= 70%, sinon Unisexe
+
+Top 10 produits (Homme) par male_interactions:
+  71495725947 | Men's Chinos - Relaxed White | male_interactions=24
+  71495725948 | Men's Joggers - Premium White | male_interactions=24
+  71495725949 | Men's Shorts - Premium Olive | male_interactions=24
+  71495725950 | Men's Sneakers - Premium Grey | male_interactions=24
+  71495725926 | Men's Joggers - Relaxed White | male_interactions=24
+  71495725927 | Men's Shorts - Regular Fit Olive | male_interactions=24
+  71495725928 | Men's Sneakers - Classic Charcoal | male_interactions=24
+  71495725934 | Men's Socks - Slim Fit Charcoal | male_interactions=24
+  71495725941 | Men's T-Shirt - Regular Fit Charcoal | male_interactions=24
+  71495725919 | Men's T-Shirt - Relaxed Khaki | male_interactions=24
+
+Top 10 produits (Femme) par female_interactions:
+  345830029 | 2PACK Tanktop body girly | female_interactions=24
+  427114014 | 2P LS GIRLY PJ TVP | female_interactions=24
+  904198001 | Good Girl Push Top | female_interactions=24
+  904993002 | Girlfriend Trash consc. | female_interactions=24
+  5015684042 | Girlfriend R.W. | female_interactions=24
+  5318352138 | New Girl Push Top | female_interactions=24
+  511961001 | Girly Tank | female_interactions=24
+  923103001 | Girlfriend ankle (D) | female_interactions=24
+  517596001 | Girly Satin Tank | female_interactions=24
+  523944002 | 4PCS LS Girly PJ | female_interactions=24
+
+Top 10 produits (Unisexe) par total_interactions:
+  1109068007 | BB Rico Trouser | total_interactions=96
+  1298196018 | ERIK TANKTOP 2 PK | total_interactions=96
+  1302506006 | Grail tee | total_interactions=96
+  1308092005 | Clarence back detail | total_interactions=96
+  1441904003 | DENIM Jon ss aop | total_interactions=96
+  1481854009 | Cleo long sleeve | total_interactions=96
+  1527454008 | Lady | total_interactions=96
+  1567034008 | Kiki LL-PJ (J) | total_interactions=96
+  1673102007 | Dani Sandal | total_interactions=96
+  1725940005 | Mariah fancy dobby | total_interactions=96

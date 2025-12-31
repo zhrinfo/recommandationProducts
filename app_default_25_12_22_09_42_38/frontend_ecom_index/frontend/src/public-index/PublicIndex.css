@@ -1,0 +1,64 @@
+/* PublicIndex CSS - Uses shared design system from index.css */
+
+/* Language switch styles */
+.language-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.language-switch button {
+  padding: 0.25rem 0.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.language-switch button:hover {
+  opacity: 0.7;
+}
+
+.language-switch button.active {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.language-switch span {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Auth buttons */
+.auth-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.auth-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid hsl(var(--border));
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.auth-btn:hover {
+  background: hsl(var(--secondary));
+}
+
+.auth-btn-primary {
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+  border-color: hsl(var(--foreground));
+}
+
+.auth-btn-primary:hover {
+  opacity: 0.9;
+  background: hsl(var(--foreground));
+}
