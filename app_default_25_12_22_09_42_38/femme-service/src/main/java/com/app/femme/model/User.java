@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "usewrs_local")
+@Table(name = "users_local")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

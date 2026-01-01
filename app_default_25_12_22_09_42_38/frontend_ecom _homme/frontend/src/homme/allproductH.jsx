@@ -1,14 +1,35 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import './allproductH.css';
 
 const AllProductH = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { username } = useParams();
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  const handleAddToCart = async (product) => {
+    try {
+      await fetch("http://localhost:8081/api/interactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "ADD_TO_CART",
+          userId: username,
+          productId: product.id,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+      alert(`${product.name} a été ajouté au panier`);
+    } catch (err) {
+      console.error('Erreur lors de l\'ajout au panier:', err);
+      alert('Erreur lors de l\'ajout au panier');
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -73,7 +94,10 @@ const AllProductH = () => {
                     {product.price.toFixed(2)} €
                   </span>
                 </div>
-                <button className="add-to-cart-btn">
+                <button 
+                  className="add-to-cart-btn"
+                  onClick={() => handleAddToCart(product)}
+                >
                   Ajouter au panier
                 </button>
               </div>

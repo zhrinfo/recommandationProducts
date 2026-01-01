@@ -9,7 +9,7 @@ import FemmeIndex from "./femme/FemmeIndex";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import AllProductsF from "./femme/allproductF";
-import DetailProduit from "./femme/DetailProduit";
+import DetailProduit from "./femme/detailProduit";
 
 const queryClient = new QueryClient();
 
@@ -26,7 +26,7 @@ const App = () => (
               <FemmeIndex />
             </ProtectedRoute>
           } />
-          <Route path="/femme/products" element={<AllProductsF />} />
+          <Route path="/femme/:username/products" element={<AllProductsF />} />
           <Route path="/femme/produit/:productId" element={
             <ProtectedRoute allowedGender="FEMALE">
               <DetailProduit />

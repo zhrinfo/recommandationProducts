@@ -119,9 +119,14 @@ const HommeIndex = () => {
   ];
 
   const [trendingProducts, setTrendingProducts] = useState([]);
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8081/api/products")
+    const fetchUrl = username 
+      ? `http://localhost:8081/api/recommendations/homme/user/${username}`
+      : "http://localhost:8081/api/products";
+      
+    fetch(fetchUrl)
       .then((res) => res.json())
       .then((data) => {
         // Map API products to match ProductCarousel expected props
@@ -132,7 +137,58 @@ const HommeIndex = () => {
         setTrendingProducts(mapped);
       })
       .catch(() => setTrendingProducts([]));
-  }, []);
+  }, [username]);
+
+  // Charger les recommandations personnalisées
+  useEffect(() => {
+    if (!username) return;
+    
+    const fetchRecommendations = async () => {
+      try {
+        console.log(`Fetching recommendations for user: ${username}`);
+        const response = await fetch(`http://localhost:4001/api/recommendations/homme/${username}`);
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            `Erreur ${response.status}: ${errorData.message || 'Erreur inconnue'}` 
+          );
+        }
+
+        const responseData = await response.json();
+        console.log('Réponse de l\'API des recommandations:', responseData);
+        
+        if (!responseData.recommendations || !Array.isArray(responseData.recommendations)) {
+          console.error('Format de réponse inattendu. Tableau de recommandations attendu mais reçu:', responseData);
+          setRecommendedProducts([]);
+          return;
+        }
+
+        const processedProducts = responseData.recommendations.map((product) => ({
+          ...product,
+          id: product.id.toString(),
+          name: product.name,
+          price: product.price,
+          category: product.category,
+          image: product.image_url || 'https://via.placeholder.com/300x400?text=No+Image',
+          recommendation_score: product.recommendation_score,
+          recommendation_type: product.recommendation_type
+        }));
+        
+        console.log('Produits recommandés traités:', processedProducts);
+        setRecommendedProducts(processedProducts);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des recommandations:', {
+          error: error.message,
+          name: error.name,
+          stack: error.stack,
+        });
+        setRecommendedProducts([]);
+      }
+    };
+
+    fetchRecommendations();
+  }, [username]);
 
   const popularBrands = [
     { id: "1", name: "Nike", logo: "https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg" },
@@ -205,9 +261,24 @@ const HommeIndex = () => {
           products={trendingProducts}
           showAllButton={true}
           allButtonText={t.allProducts}
-          onAllClick={() => window.location.href = '/homme/allproductH'}
+          onAllClick={() => navigate(`/homme/${username}/allproductH`)}
           onProductClick={handleProductClick}
         />
+
+        {/* Recommended for You Section */}
+        {recommendedProducts.length > 0 && (
+          <section className="py-12 bg-gray-50">
+            <div className="container mx-auto px-4">
+              <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">
+                {language === 'fr' ? 'Recommandations pour vous' : 'Recommended for You'}
+              </h2>
+              <ProductCarousel
+                products={recommendedProducts}
+                onProductClick={handleProductClick}
+              />
+            </div>
+          </section>
+        )}
 
         {/* Popular Brands */}
         <BrandLogos

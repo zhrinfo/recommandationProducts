@@ -25,7 +25,7 @@ const App = () => (
               <HommeIndex />
             </ProtectedRoute>
           } />
-          <Route path="/homme/allproductH" element={<AllProductH />} />
+          <Route path="/homme/:username/allproductH" element={<AllProductH />} />
           <Route path="/homme/produit/:productId" element={
             <ProtectedRoute allowedGender="MALE">
               <DetailProduit />

@@ -168,7 +168,7 @@ public class RouterController {
                 })
                 .collect(Collectors.toList());
     }
-//homme 80% et 20% femme
+// Retourne 100% des produits homme et 20% des produits femme
 @GetMapping("/products/balanced")
 public List<Map<String, Object>> getBalancedProducts() {
     List<Map<String, Object>> hommeProducts = fetchProductsFrom(hommeServiceUrl);
@@ -178,13 +178,11 @@ public List<Map<String, Object>> getBalancedProducts() {
     hommeProducts.sort((a, b) -> compareProductsById(a, b));
     femmeProducts.sort((a, b) -> compareProductsById(a, b));
     
-    // Calculer le nombre de produits à prendre pour chaque catégorie
-    int totalDesired = 10; // Nombre total de produits souhaités
-    int hommeCount = (int) Math.ceil(totalDesired * 0.8); // 80% d'hommes
-    int femmeCount = totalDesired - hommeCount; // 20% de femmes
+    // Prendre 100% des produits homme
+    List<Map<String, Object>> selectedHomme = new ArrayList<>(hommeProducts);
     
-    // Prendre les N premiers produits de chaque catégorie
-    List<Map<String, Object>> selectedHomme = hommeProducts.subList(0, Math.min(hommeCount, hommeProducts.size()));
+    // Calculer 20% des produits femme
+    int femmeCount = (int) Math.ceil(femmeProducts.size() * 0.2);
     List<Map<String, Object>> selectedFemme = femmeProducts.subList(0, Math.min(femmeCount, femmeProducts.size()));
     
     // Combiner les listes
@@ -200,7 +198,7 @@ public List<Map<String, Object>> getBalancedProducts() {
 
 
 
-//80% femme, 20% homme
+// Retourne 100% des produits femme et 20% des produits homme
 @GetMapping("/products/balanced-femme")
 public List<Map<String, Object>> getBalancedFemmeProducts(
     @RequestParam(defaultValue = "10") int total
@@ -212,15 +210,12 @@ public List<Map<String, Object>> getBalancedFemmeProducts(
     hommeProducts.sort(this::compareProductsById);
     femmeProducts.sort(this::compareProductsById);
     
-    // Calculer le nombre de produits à prendre pour chaque catégorie
-    int femmeCount = (int) Math.ceil(total * 0.8); // 80% de femmes
-    int hommeCount = total - femmeCount; // 20% d'hommes
+    // Prendre 100% des produits femme
+    List<Map<String, Object>> selectedFemme = new ArrayList<>(femmeProducts);
     
-    // Prendre les N premiers produits de chaque catégorie
-    List<Map<String, Object>> selectedFemme = femmeProducts.subList(
-        0, Math.min(femmeCount, femmeProducts.size()));
-    List<Map<String, Object>> selectedHomme = hommeProducts.subList(
-        0, Math.min(hommeCount, hommeProducts.size()));
+    // Calculer 20% des produits homme
+    int hommeCount = (int) Math.ceil(hommeProducts.size() * 0.2);
+    List<Map<String, Object>> selectedHomme = hommeProducts.subList(0, Math.min(hommeCount, hommeProducts.size()));
     
     // Combiner les listes
     List<Map<String, Object>> result = new ArrayList<>();

@@ -39,6 +39,7 @@ const FemmeIndex = () => {
       giftingTitle: "Idées Cadeaux Femme",
       categoryTitle: "Acheter par Catégorie",
       trendingTitle: "Chaussures Tendances",
+      recommendedTitle: "Recommandations pour vous",
       brandsTitle: "Marques Populaires",
       trendingNow: "Tendances du Moment",
       promoBanner: "Le Nouveau Casual",
@@ -62,6 +63,7 @@ const FemmeIndex = () => {
       giftingTitle: "Women's Gift Ideas",
       categoryTitle: "Shop by Category",
       trendingTitle: "Trending Shoes",
+      recommendedTitle: "Recommended for You",
       brandsTitle: "Popular Brands",
       trendingNow: "Trending Now",
       promoBanner: "The New Casual",
@@ -101,20 +103,83 @@ const FemmeIndex = () => {
   ];
 
   const [trendingProducts, setTrendingProducts] = useState([]);
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
 
+  // Charger les produits tendance
   useEffect(() => {
-    fetch("http://localhost:8082/api/products")
+    const url = username 
+      ? `http://localhost:8082/api/recommendations/femme/${username}`
+      : 'http://localhost:8082/api/recommendations/femme';
+      
+    fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        // Map API products to match ProductCarousel expected props
         const mapped = data.map((p) => ({
           ...p,
           image: p.imageUrl,
         }));
         setTrendingProducts(mapped);
       })
-      .catch(() => setTrendingProducts([]));
-  }, []);
+      .catch((error) => {
+        console.error('Error fetching trending products:', error);
+        setTrendingProducts([]);
+      });
+  }, [username]);
+
+  // Charger les recommandations personnalisées
+  useEffect(() => {
+    if (!username) return;
+    
+    const fetchRecommendations = async () => {
+      try {
+        console.log(`Fetching recommendations for user: ${username}`);
+        const response = await fetch(`http://localhost:4000/api/recommendations/femme/${username}`);
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            `Erreur ${response.status}: ${errorData.message || 'Erreur inconnue'}`
+          );
+        }
+
+        const responseData = await response.json();
+        console.log('Réponse de l\'API des recommandations:', responseData);
+        
+        // Vérifier si nous avons des recommandations
+        if (!responseData.recommendations || !Array.isArray(responseData.recommendations)) {
+          console.error('Format de réponse inattendu. Tableau de recommandations attendu mais reçu:', responseData);
+          setRecommendedProducts([]);
+          return;
+        }
+
+        // Traitement des produits recommandés
+        const processedProducts = responseData.recommendations.map((product) => ({
+          ...product,
+          id: product.id.toString(), // S'assurer que l'ID est une chaîne
+          name: product.name,
+          price: product.price,
+          category: product.category,
+          image: product.image_url || 'https://via.placeholder.com/300x400?text=No+Image',
+          // Conserver les autres propriétés utiles
+          recommendation_score: product.recommendation_score,
+          recommendation_type: product.recommendation_type
+        }));
+        
+        console.log('Produits recommandés traités:', processedProducts);
+
+        setRecommendedProducts(processedProducts);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des recommandations:', {
+          error: error.message,
+          name: error.name,
+          stack: error.stack,
+        });
+        setRecommendedProducts([]);
+      }
+    };
+
+    fetchRecommendations();
+  }, [username]);
 
   const popularBrands = [
     { id: "1", name: "Nike", logo: "https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg" },
@@ -137,7 +202,7 @@ const FemmeIndex = () => {
           title={t.trendingTitle}
           products={trendingProducts}
           allProductsText={t.allProducts}
-          allProductsLink="/femme/products"
+          allProductsLink={`/femme/${username}/products`}
           onProductClick={async (product) => {
             // Send interaction POST
             try {
@@ -157,6 +222,35 @@ const FemmeIndex = () => {
             navigate(`/femme/produit/${product.id}`);
           }}
         />
+        
+        {/* Section Recommandations pour vous */}
+        {username && (
+          <ProductCarousel
+            title={t.recommendedTitle}
+            products={recommendedProducts}
+            allProductsText={t.allProducts}
+            allProductsLink={`/femme/${username}/products`}
+            onProductClick={async (product) => {
+              try {
+                await fetch('http://localhost:4000/api/interactions', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    userId: username,
+                    productId: product.id,
+                    interactionType: 'view',
+                    timestamp: new Date().toISOString()
+                  })
+                });
+                navigate(`/femme/${username}/product/${product.id}`);
+              } catch (error) {
+                console.error('Error tracking interaction:', error);
+                navigate(`/femme/${username}/product/${product.id}`);
+              }
+            }}
+          />
+        )}
+        
         <BrandLogos title={t.brandsTitle} brands={popularBrands} />
         <section className="container py-8 md:py-12">
           <h2 className="font-display text-xl md:text-2xl text-center mb-8 uppercase tracking-wide">{t.trendingNow}</h2>

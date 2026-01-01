@@ -89,3 +89,30 @@ services:
       - REACT_APP_API_URL=http://localhost:8080
     depends_on:
       - index-service
+
+  frontend-index:
+    build: ./frontend_ecom_index/frontend
+    ports:
+      - "8085:8085"
+    environment:
+      - VITE_API_URL=http://localhost:8080
+    depends_on:
+      - index-service
+
+  frontend-homme:
+    build: ./frontend_ecom _homme/frontend
+    ports:
+      - "8086:8086"
+    environment:
+      - VITE_API_URL=http://localhost:8081
+    depends_on:
+      - homme-service
+
+  frontend-femme:
+    build: ./frontend_ecom_femme/frontend
+    ports:
+      - "8087:8087"
+    environment:
+      - VITE_API_URL=http://localhost:8082
+    depends_on:
+      - femme-service

@@ -10,6 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
+
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin("*")
@@ -43,6 +47,28 @@ public class UserController {
             logger.error("Erreur lors de l'enregistrement", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Une erreur est survenue lors de l'enregistrement: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/username/{username}")
+    public ResponseEntity<?> getUserIdByUsername(@PathVariable String username) {
+        try {
+            logger.info("Recherche de l'ID pour l'utilisateur: {}", username);
+            
+            Optional<User> userOpt = userRepository.findByUsername(username);
+            if (userOpt.isPresent()) {
+                return ResponseEntity.ok(userOpt.get().getId());
+            } else {
+                logger.warn("Utilisateur non trouvé: {}", username);
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Utilisateur non trouvé avec le nom: " + username);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+        } catch (Exception e) {
+            logger.error("Erreur lors de la recherche de l'utilisateur: " + username, e);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Une erreur est survenue lors de la recherche de l'utilisateur: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }

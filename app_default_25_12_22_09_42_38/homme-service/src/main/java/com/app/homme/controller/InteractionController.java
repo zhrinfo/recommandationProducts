@@ -44,4 +44,5 @@ public class InteractionController {
                 type.equals("VIEW") || 
                 type.equals("PURCHASE"));
     }
+    
 }

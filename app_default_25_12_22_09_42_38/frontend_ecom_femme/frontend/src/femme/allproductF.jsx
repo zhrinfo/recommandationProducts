@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import HommeHeader from "../homme/components/HommeHeader";
 import HommeFooter from "../homme/components/HommeFooter";
 import "./allproductF.css";
 
 const AllProductsF = () => {
+  const { username } = useParams();
   const [language, setLanguage] = useState('fr');
   const [products, setProducts] = useState([]);
+  const [isAddingToCart, setIsAddingToCart] = useState({});
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('default');
@@ -20,19 +22,21 @@ const AllProductsF = () => {
       filterBy: "Filtrer par",
       sortBy: "Trier par",
       allCategories: "Toutes les catégories",
-      priceRange: "Gamme de prix",
       default: "Par défaut",
       priceLowHigh: "Prix: croissant",
       priceHighLow: "Prix: décroissant",
       newest: "Nouveautés",
       addToCart: "Ajouter au panier",
+      addedToCart: "ajouté au panier",
       viewDetails: "Voir détails",
       noProducts: "Aucun produit trouvé",
       loading: "Chargement...",
       products: "produits",
       quickView: "Aperçu rapide",
       newBadge: "Nouveau",
-      saleBadge: "Solde"
+      saleBadge: "Solde",
+      adding: "Ajout en cours...",
+      productAdded: "Le produit a été ajouté à votre panier"
     },
     en: {
       pageTitle: "All Products",
@@ -46,17 +50,59 @@ const AllProductsF = () => {
       priceHighLow: "Price: High to Low",
       newest: "Newest",
       addToCart: "Add to Cart",
+      addedToCart: "added to cart",
       viewDetails: "View Details",
       noProducts: "No products found",
       loading: "Loading...",
       products: "products",
       quickView: "Quick View",
       newBadge: "New",
-      saleBadge: "Sale"
+      saleBadge: "Sale",
+      adding: "Adding...",
+      productAdded: "Product has been added to your cart"
     }
   };
 
   const t = texts[language];
+
+  const handleAddToCart = async (product) => {
+    if (!username) {
+      // Optionally redirect to login or show a message
+      console.log('User not logged in');
+      return;
+    }
+    
+    try {
+      // Set loading state for this specific product
+      setIsAddingToCart(prev => ({ ...prev, [product.id]: true }));
+      
+      // Track the interaction
+      await fetch("http://localhost:8082/api/interactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "ADD_TO_CART",
+          userId: username,
+          productId: product.id,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      // Show success message
+      alert(`${product.name} ${t.addedToCart}`);
+      
+      // Here you can add the actual cart logic if needed
+      // For example, you might want to update a cart context or state
+      console.log(`Added ${product.name} to cart`);
+      
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      // Handle error (e.g., show error message to user)
+    } finally {
+      // Reset loading state
+      setIsAddingToCart(prev => ({ ...prev, [product.id]: false }));
+    }
+  };
 
   const categories = [
     { id: 'all', name: language === 'fr' ? 'Toutes' : 'All' },
@@ -71,7 +117,7 @@ const AllProductsF = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch("http://localhost:8082/api/products")
+    fetch("http://localhost:8080/api/router/products/balanced-femme")
       .then((res) => res.json())
       .then((data) => {
         const mapped = data.map((p) => ({
@@ -141,26 +187,7 @@ const AllProductsF = () => {
                 </div>
               </div>
 
-              <div className="filter-group">
-                <h3 className="filter-title">{t.priceRange}</h3>
-                <div className="price-range-inputs">
-                  <input
-                    type="number"
-                    value={priceRange[0]}
-                    onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
-                    placeholder="Min"
-                    className="price-input"
-                  />
-                  <span className="price-separator">-</span>
-                  <input
-                    type="number"
-                    value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
-                    placeholder="Max"
-                    className="price-input"
-                  />
-                </div>
-              </div>
+              
             </aside>
 
             {/* Products Grid */}
@@ -264,13 +291,26 @@ const AllProductsF = () => {
                         </div>
 
                         {/* Add to Cart Button */}
-                        <button className="add-to-cart-btn">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="8" cy="21" r="1"></circle>
-                            <circle cx="19" cy="21" r="1"></circle>
-                            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
-                          </svg>
-                          {t.addToCart}
+                        <button 
+                          className={`add-to-cart-btn ${isAddingToCart[product.id] ? 'loading' : ''}`}
+                          onClick={() => handleAddToCart(product)}
+                          disabled={isAddingToCart[product.id]}
+                        >
+                          {isAddingToCart[product.id] ? (
+                            <>
+                              <div className="spinner"></div>
+                              {t.adding || 'Adding...'}
+                            </>
+                          ) : (
+                            <>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="8" cy="21" r="1"></circle>
+                                <circle cx="19" cy="21" r="1"></circle>
+                                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                              </svg>
+                              {t.addToCart}
+                            </>
+                          )}
                         </button>
                       </div>
 
